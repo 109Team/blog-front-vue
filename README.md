@@ -1,4 +1,4 @@
-# hopen-space-vue
+# blog-front-vue
 
 ## Project setup
 ```

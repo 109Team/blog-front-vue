@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from './views/Home.vue';
+import Posts from './views/Posts.vue';
 
 Vue.use(Router);
 
@@ -12,6 +13,23 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home,
+      children: [
+        {
+          path: '/',
+          name: 'posts',
+          component: Posts,
+        },
+        {
+          path: '/post/:postId',
+          name: 'post',
+          component: () => import(/* webpackChunkName: "post" */ './views/Post.vue'),
+        },
+        {
+          path: '/categrey',
+          name: 'categrey',
+          component: () => import(/* webpackChunkName: "categrey" */ './views/Categrey.vue'),
+        }
+      ]
     },
     {
       path: '/about',
