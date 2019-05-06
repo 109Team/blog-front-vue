@@ -1,6 +1,6 @@
 {
-  "name": "hopen-space-vue",
-  "short_name": "hopen-space-vue",
+  "name": "blog-front-vue",
+  "short_name": "blog-front-vue",
   "icons": [
     {
       "src": "./img/icons/android-chrome-192x192.png",
