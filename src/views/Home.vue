@@ -1,9 +1,11 @@
 <template>
 	<div>
-		<nav-bar :nav-list="navList"></nav-bar>
-		<div class="content">
-			<router-view/>
-		</div>
+		<nav-bar :nav-list="navList" class="nav"></nav-bar>
+			<div class="content">
+		<transition name="fade">
+				<router-view/>
+		</transition>
+			</div>
 	</div>
 </template>
 
@@ -29,11 +31,6 @@ export default class Home extends Vue {
 				route: '/'
 			},
 			{
-				id: 2,
-				label: "文章",
-				route: '/post/123'
-			},
-			{
 				id: 3,
 				label: "分类",
 				route: '/categrey'
@@ -50,10 +47,12 @@ export default class Home extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import "../assets/theme.scss";
+@import "@/assets/theme.scss";
+.nav{
+	background: linear-gradient(0deg, #e4e4e4, #f7f7f7);
+}
 .content{
 	margin: 0 auto;
-	background: #666;
 	height: calc(100vh - #{$navH});
 }
 @media screen and (min-width: 1200px){

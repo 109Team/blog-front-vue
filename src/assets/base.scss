@@ -5,3 +5,15 @@ body{
     width: 100%;
     height: 100%;
 }
+ul{
+    margin: 0;
+}
+
+.fade-enter-active, .fade-leave-active{
+    transition: all .3s ease-in-out;
+}
+.fade-enter, .fade-leave{
+    transform: translate(30px);
+    opacity: 0;
+}
+
