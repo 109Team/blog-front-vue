@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from './views/Home.vue';
-import Posts from './views/Posts.vue';
+import Home from '@/views/Home.vue';
+import Posts from '@/views/Posts.vue';
 
 Vue.use(Router);
 
@@ -10,22 +10,21 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: '/',
-      name: 'home',
+      path: '/home',
       component: Home,
       children: [
         {
-          path: '/',
+          path: '',
           name: 'posts',
           component: Posts,
         },
         {
-          path: '/post/:postId',
+          path: 'post/:postId',
           name: 'post',
           component: () => import(/* webpackChunkName: "post" */ './views/Post.vue'),
         },
         {
-          path: '/categrey',
+          path: 'categrey',
           name: 'categrey',
           component: () => import(/* webpackChunkName: "categrey" */ './views/Categrey.vue'),
         }
@@ -39,5 +38,9 @@ export default new Router({
       // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue'),
     },
+    {
+      path: '/',
+      redirect:'/home'
+    }
   ],
 });

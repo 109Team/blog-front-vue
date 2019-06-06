@@ -17,3 +17,12 @@ export default class Categrey extends Vue{
 }
 </script>
 
+<style lang="scss" scoped>
+ul{
+    width: 100%;
+	height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+</style>
+

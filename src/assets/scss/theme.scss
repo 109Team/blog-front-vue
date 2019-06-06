@@ -1,0 +1,24 @@
+
+/* Color Theme Swatches in Hex */
+$Color-1-hex: #F8F5F1;
+$Color-2-hex: #000000;
+$Color-3-hex: #FFFFFF;
+$Color-4-hex: #ECBA78;
+
+
+/* Color Theme Swatches in RGBA */
+$Color-1-rgba: rgba(248,245,241, 1);
+$Color-2-rgba: rgba(0, 0, 0, 1);
+$Color-3-rgba: rgba(255,255,255, 1);
+$Color-4-rgba: rgba(236,186,120, 1);
+
+//---navbar theme---//
+$navH: 60px;
+$navColor: $Color-2-hex;
+$navBgColor: $Color-3-hex;
+
+//---home theme---//
+$homeBgColor: $Color-1-hex;
+
+//---posts theme---//
+$postItemBgColor: $Color-3-hex;
