@@ -15,15 +15,12 @@ import { Post as PostModel } from '@/model/post';
 export default class Post extends Vue{
 
     public post!: PostModel;
-    private created(){
-        this.initData();
-    }
-
-    private initData(){
+    private beforeCreate(){
         this.$API.getPost(this.$route.params.postId).then((data: any) => {
             this.post = data.data;
         })
     }
+
 }
 </script>
 
