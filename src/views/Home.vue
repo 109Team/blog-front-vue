@@ -51,7 +51,7 @@ export default class Home extends Vue {
 
 <style lang="scss" scoped>
 @import "@/assets/scss/theme.scss";
-.home{
+.home {
 	display: flex;
 	flex-direction: center;
 	width: 100%;
@@ -70,14 +70,14 @@ export default class Home extends Vue {
 	position: fixed;
 	z-index: 100;
 	display: flex;
-	.logo{
+	.logo {
 		width: $navH * 3;
 		height: $navH;
-		background-image: url('../assets/img/logo.png');
+		background-image: url("../assets/img/logo.png");
 		background-position: center;
 		background-size: cover;
 	}
-	.nav-bar{
+	.nav-bar {
 		width: calc(100% - #{$navH * 3});
 	}
 }
@@ -88,7 +88,7 @@ export default class Home extends Vue {
 	position: relative;
 	left: 50%;
 	padding-top: $navH;
-    transform: translateX(-50%);
+	transform: translateX(-50%);
 }
 @media screen and (min-width: 1200px) {
 	.content {

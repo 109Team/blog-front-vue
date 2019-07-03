@@ -10,7 +10,7 @@ const API = {
     },
 
     getPost(id: string): Promise<object>{
-        return HTTP.get(`/post/${id}`);
+        return HTTP.get(`/posts/${id}`);
     }
 }
 
