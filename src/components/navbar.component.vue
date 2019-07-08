@@ -5,7 +5,7 @@
             
             @click="itemClick(item)">{{item.label}}
         </li>
-        <li ref="activedEle" class="active-item" :style="activedStyle"></li>
+        <li ref="activedEle" class="active-item" v-if="initedNavList.length" :style="activedStyle"></li>
     </ul>
 </template>
 

@@ -27,6 +27,10 @@ export default class Home extends Vue {
 	public navList: NavBarItem[] = [];
 
 	private init(): void {
+		
+	}
+
+	private beforeCreate() {
 		this.navList = [
 			{
 				id: 1,
@@ -40,12 +44,6 @@ export default class Home extends Vue {
 			}
 		];
 	}
-
-	private created() {
-		this.init();
-	}
-
-	private mounted() {}
 }
 </script>
 
@@ -73,7 +71,7 @@ export default class Home extends Vue {
 	.logo {
 		width: $navH * 3;
 		height: $navH;
-		background-image: url("../assets/img/logo.png");
+		background-image: url("../../assets/img/logo.png");
 		background-position: center;
 		background-size: cover;
 	}
