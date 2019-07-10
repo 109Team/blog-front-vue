@@ -63,12 +63,14 @@ export default class Admin extends Vue {
 }
 .content {
 	width: 100%;
-	height: calc(100% - #{$navH});
+	height: 100%;
 	overflow: hidden;
 	position: relative;
 	left: 50%;
 	padding-top: $navH;
 	transform: translateX(-50%);
+	box-sizing: border-box;
+	overflow-y: scroll;
 }
 </style>
 

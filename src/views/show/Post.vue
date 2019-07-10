@@ -17,6 +17,7 @@ import { Component, Vue } from "vue-property-decorator";
 import marked, { Renderer } from "marked";
 import * as hljs from "highlight.js";
 import mermaid from "mermaid";
+import "highlight.js/styles/qtcreator_dark.css";
 
 import { Post as PostModel } from "@/model/post";
 import { escape } from "@/common/util";
@@ -78,8 +79,8 @@ function overridRendererCode(langPrefix: string = "language-"): Renderer {
 	return _renderer;
 }
 
-// 将markdown文本转为html
-function convertMarkdown(content: string = ""): string{
+// 初始化marked
+function initMarked(content: string = ""): void{
     marked.setOptions({
         renderer: overridRendererCode(),
         pedantic: false,
@@ -91,8 +92,9 @@ function convertMarkdown(content: string = ""): string{
         smartypants: false,
         xhtml: true
     });
-    return marked(content);
 }
+
+initMarked();
 
 @Component
 export default class Post extends Vue {
@@ -101,7 +103,7 @@ export default class Post extends Vue {
 	private beforeCreate(): void {
 		this.$API.getPost(this.$route.params.postId).then((data: any) => {
             this.post = data.data;
-            this.content = convertMarkdown(this.post.content);
+            this.content = marked(this.post.content);
             setTimeout(() => {
                 mermaid.init('.mermaid');
             }, 0)
@@ -113,7 +115,6 @@ export default class Post extends Vue {
 }
 </script>
 
-<style src="highlight.js/styles/qtcreator_dark.css"></style>
 <style lang="scss">
 @import "@/assets/scss/theme.scss";
 .post-warpper {

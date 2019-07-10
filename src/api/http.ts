@@ -34,11 +34,19 @@ axios.interceptors.response.use(
 
 
 export default {
-    post(url: string, params?: object): Promise<object>{
+    post(url: string, params?: object): Promise<any>{
         return axios.post(url, params);
     },
 
-    get(url: string, params?: object): Promise<object>{
+    get(url: string, params?: object): Promise<any>{
         return axios.get(url, {params: params});
+    },
+
+    put(url: string, params?: object): Promise<any>{
+        return axios.put(url, params);
+    },
+
+    delete(url: string, params?: object): Promise<any>{
+        return axios.delete(url, {params: params});
     }
 }
