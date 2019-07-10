@@ -32,12 +32,17 @@ export default new Router({
     },
     {
       path: '/admin',
-      component: () => import(/* webpackChunkName: "categrey" */ './views/edit/Admin.vue'),
+      component: () => import(/* webpackChunkName: "admin" */ './views/edit/Admin.vue'),
       children: [
         {
           path: '',
           name: 'postlist',
-          component: () => import(/* webpackChunkName: "categrey" */ './views/edit/PostList.vue'),
+          component: () => import(/* webpackChunkName: "postlist" */ './views/edit/PostList.vue'),
+        },
+        {
+          path: 'edit',
+          name: 'edit',
+          component: () => import(/* webpackChunkName: "edit" */ './views/edit/Edit.vue'),
         }
       ]
     },

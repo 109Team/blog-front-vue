@@ -90,12 +90,24 @@ function escape(html: string, encode: boolean): string {
     return html;
 }
 
+// 函数防抖
+function debounce(fn: Function, wait: number = 300): Function{
+    let _timer: any = null;
+    return function(this: void){
+        clearTimeout(_timer);
+        _timer = setTimeout(() => {
+            fn.apply(this, arguments);
+        }, wait);
+    }
+}
+
 export {
     cookies,
     cookieOption,
+    debounce,
+    escape,
     isArray,
     isEmpty,
     isNull,
-    isObject,
-    escape
+    isObject
 }

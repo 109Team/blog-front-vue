@@ -1,8 +1,9 @@
 interface API{
-    getAllPosts: () => Promise<object>;
-    createAPost: (post: object) => Promise<object>;
-    getPost: (id: string) => Promise<object>;
+    getAllPosts: () => Promise<any>;
+    createAPost: (post: object) => Promise<any>;
+    getPost: (id: string) => Promise<any>;
+    updatePost: (id: string, post: object) => Promise<any>;
+    deletePost: (id: string) => Promise<any>;
 }
 
-export default
-    API
+export default API

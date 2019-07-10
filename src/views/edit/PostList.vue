@@ -1,44 +1,46 @@
 <template>
 	<section class="post-list-wapper">
 		<div class="list-header">
-			<a-button class="editable-add-btn">新建</a-button>
+			<a-button class="editable-add-btn" @click="onCreate">新建</a-button>
 		</div>
 		<div class="list-content">
 			<a-table
 				:dataSource="postList"
 				:columns="columns"
 				:rowKey="'_id'"
-				:pagination="{ pageSize: 10 }"
+				:pagination="{ pageSize: 7 }"
 			>
 				<template slot="__id" slot-scope="text, record, index">
 					<p>{{index + 1}}</p>
 				</template>
-                <template slot="status" slot-scope="text">
+				<template slot="status" slot-scope="text">
 					<p :style="{'color': statusArray[text]['color']}">{{statusArray[text]['label']}}</p>
 				</template>
-                <template slot="update_time" slot-scope="text">
-                    <p>{{text | dateString}}</p>
-                </template>
-                <template slot="operation" slot-scope="text, record">
-                    <a href="javascript:;" class="edit-btn" @click="onEdit(record._id)">编辑</a>
-                    <a-popconfirm
-                        v-if="postList.length && ~[1,2].indexOf(record.status)"
-                        cancelText="取消"
-                        okText="确认"
-                        :title="`确认${record.status === 2 ? '永久': ''}删除?`"
-                        @confirm="() => onDelete(record._id)">
-                        <a v-if="record.status === 1" style="color: #ceb4be;" href="javascript:;">删除</a>
-                        <a v-else style="color: #ff0000;" href="javascript:;">永久删除</a>
-                    </a-popconfirm>
-                    <a-popconfirm
-                        v-if="postList.length && record.status === 0"
-                        cancelText="取消"
-                        okText="确认"
-                        title="确认发布?"
-                        @confirm="() => onPublish(record._id)">
-                        <a style="color:#2bc39d;" href="javascript:;">发布</a>
-                    </a-popconfirm>
-                </template>
+				<template slot="update_time" slot-scope="text">
+					<p>{{text | dateString}}</p>
+				</template>
+				<template slot="operation" slot-scope="text, record, index">
+					<a href="javascript:;" class="edit-btn" @click="onEdit(record._id)">编辑</a>
+					<a-popconfirm
+						v-if="postList.length && ~[1,2].indexOf(record.status)"
+						cancelText="取消"
+						okText="确认"
+						:title="`确认${record.status === 2 ? '永久': ''}删除?`"
+						@confirm="() => onDelete(record, index)"
+					>
+						<a v-if="record.status === 1" style="color: #ceb4be;" href="javascript:;">删除</a>
+						<a v-else style="color: #ff0000;" href="javascript:;">永久删除</a>
+					</a-popconfirm>
+					<a-popconfirm
+						v-if="postList.length && record.status === 0"
+						cancelText="取消"
+						okText="确认"
+						title="确认发布?"
+						@confirm="() => onPublish(record, index)"
+					>
+						<a style="color:#2bc39d;" href="javascript:;">发布</a>
+					</a-popconfirm>
+				</template>
 			</a-table>
 		</div>
 	</section>
@@ -46,39 +48,37 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { Table, Button, Popconfirm, Tree } from "ant-design-vue";
+import { Table, Button, Popconfirm } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
 import { Post } from "@/model/post";
 
 // 注册三方组件
-function registerComponent(components: Array<any>): void{
-    components.forEach(item => Vue.use(item));
+function registerComponent(components: Array<any>): void {
+	components.forEach(item => Vue.use(item));
 }
-registerComponent([
-    Table, Button, Popconfirm, Tree
-]);
+registerComponent([Table, Button, Popconfirm]);
 
 @Component({
-    filters: {
-        dateString(value: Date): string{
-            return new Date(value).toLocaleString();
-        }
-    }
+	filters: {
+		dateString(value: Date): string {
+			return new Date(value).toLocaleString();
+		}
+	}
 })
 export default class Posts extends Vue {
-    public postList: Post[] = [];
-    public statusArray: Array<object> = [
-            {color: "#0000ff", label: "草稿中"},
-            {color: "#28cebb", label: "已发布"},
-            {color: "#9e3d3d", label: "已删除"}
-        ];
+	public postList: Post[] = [];
+	public statusArray: Array<object> = [
+		{ color: "#0000ff", label: "草稿中" },
+		{ color: "#28cebb", label: "已发布" },
+		{ color: "#9e3d3d", label: "已删除" }
+	];
 	public columns: any[] = [
-        {
-            title: "编号",
-            dataIndex: "__id",
+		{
+			title: "编号",
+			dataIndex: "__id",
 			scopedSlots: { customRender: "__id" }
-        },
+		},
 		{
 			title: "标题",
 			dataIndex: "title",
@@ -86,38 +86,69 @@ export default class Posts extends Vue {
 		},
 		{
 			title: "状态",
-            dataIndex: "status",
-            scopedSlots: {customRender: "status"}
+			dataIndex: "status",
+			scopedSlots: { customRender: "status" }
 		},
 		{
 			title: "更新时间",
-            dataIndex: "update_time",
-            scopedSlots: {customRender: "update_time"}
+			dataIndex: "update_time",
+			scopedSlots: { customRender: "update_time" }
 		},
 		{
 			title: "操作",
 			dataIndex: "operation",
-            width: "30%",
-            scopedSlots: {customRender: "operation"}
+			width: "30%",
+			scopedSlots: { customRender: "operation" }
 		}
 	];
 	private beforeCreate() {
 		this.$API.getAllPosts().then((data: any) => {
 			this.postList = data.data || [];
-        });
+		});
     }
-    
-    public onDelete(id: string): void{
-        console.log(id);
-    }
+   
+	public onDelete(record: Post, index: number): void {
+		if (record.status === 1) {
+			this.$API.updatePost(record._id, { status: 2 }).then(res => {
+				if (res.code == 200) {
+					Vue.set(
+						this.postList,
+						index,
+						Object.assign({}, record, { status: 2 })
+					);
+				}
+			});
+		} else {
+			this.$API.deletePost(record._id).then(res => {
+				if (res.code == 200) {
+					this.postList = this.postList.filter(
+						item => item._id !== record._id
+					);
+				}
+			});
+		}
+	}
 
-    public onPublish(id: string): void{
-        console.log(id);
-    }
+	public onPublish(record: Post, index: number): void {
+		console.log(record);
+		this.$API.updatePost(record._id, { status: 1 }).then(res => {
+			if (res.code == 200) {
+				Vue.set(
+					this.postList,
+					index,
+					Object.assign({}, record, { status: 1 })
+				);
+			}
+		});
+	}
 
-    public onEdit(id: string): void{
-        console.log(id);
-    }
+	public onEdit(id: string): void {
+		this.$router.push({ name: "edit", params: { postId: id } });
+	}
+
+	public onCreate(): void {
+		this.$router.push({ name: "edit" });
+	}
 }
 </script>
 
@@ -126,20 +157,20 @@ export default class Posts extends Vue {
 .post-list-wapper {
 	width: 100%;
 	height: 100%;
-    position: relative;
-    .list-header{
-        height: 70px;
-        width: 100%;
-        padding: 18px;
-        text-align: left;
-    }
-    .list-content{
-        width: calc(100% - 32px);
-        height: calc(100% - #{$navH + 70px});
+	position: relative;
+	.list-header {
+		height: 70px;
+		width: 100%;
+		padding: 18px;
+		text-align: left;
+	}
+	.list-content {
+		width: calc(100% - 32px);
+		height: calc(100% - 86px);
         margin: 0 16px 16px;
-        .edit-btn{
-            margin-right: 30px;
-        }
-    }
+		.edit-btn {
+			margin-right: 30px;
+		}
+	}
 }
 </style>
