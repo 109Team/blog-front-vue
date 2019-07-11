@@ -1,16 +1,22 @@
 <template>
 	<div class="edit-warpper">
 		<div class="edit-header">
-            <a-input class="title" style="width: 200px" addonBefore="标题" defaultValue="mysite" />
 			<a-button type="primary" @click="onSave">保存</a-button>
 			<a-button type="danger" @click="onPublish">发布</a-button>
 			<a-button type="danger" v-show="isShowPreBtn" @click="beforePreview">预览</a-button>
 		</div>
 		<div class="edit-area">
-			<a-input type="textarea" name="edit" addonBefore="100%" v-model="content" @input="onInput" @focus="onFocus"></a-input>
-            <transition name="fade">
-                <div class="preview-area" v-show="isShowPre"  v-html="previewContent"></div>
-            </transition> 
+			<a-input
+				type="textarea"
+				name="edit"
+				addonBefore="100%"
+				v-model="content"
+				@input="onInput"
+				@focus="onFocus"
+			></a-input>
+			<transition name="fade">
+				<div class="preview-area" v-show="isShowPre" v-html="previewContent"></div>
+			</transition>
 		</div>
 	</div>
 </template>
@@ -43,10 +49,13 @@ function overridRendererCode(langPrefix: string = "language-"): Renderer {
 		isEscaped: boolean
 	): string {
 		let lang = ((language || "").match(/\S*/) as Array<string>)[0];
-        // 如果是甘特图，则使用mermaid渲染；
+		// 如果是甘特图，则使用mermaid渲染；
 		if (lang.toLowerCase() === "mermaid") {
-            marked.prototype.hasMermaid = true;
-            return `<div class="mermaid">${code}</div>`;
+			marked.prototype.hasMermaid = true;
+			return `<div class="mermaid">${code}</div>`;
+		}
+		if (lang === "postInfo") {
+			marked.prototype.postInfoString = code;
 		}
 		if (hljs) {
 			let out;
@@ -89,8 +98,8 @@ function overridRendererCode(langPrefix: string = "language-"): Renderer {
 }
 
 // 初始化marked
-function initMarked(): void{
-    marked.setOptions({
+function initMarked(): void {
+	marked.setOptions({
 		renderer: overridRendererCode(),
 		pedantic: false,
 		gfm: true,
@@ -111,126 +120,177 @@ function registerComponent(components: Array<any>): void {
 }
 registerComponent([Button, Popconfirm, Input]);
 
+const POSTINFOREG = /```\s*?postInfo\n+(.|\n)*?\s+```\n/;
+
 @Component
 export default class Edit extends Vue {
 	public id: string = "";
-    public content: string = "";
-    public previewContent: string = "";
-    public post: Post = <Post>{};
-    public isShowPre: boolean = false;
-    public isShowPreBtn: boolean = false;
-    public isBigScreen: boolean = false;
-    private debounce: Function = new Function();
-    private mermaidTimer: any = null;
+	public content: string = "";
+	public previewContent: string = "";
+	public post: Post = <Post>{};
+	public isShowPre: boolean = false;
+	public isShowPreBtn: boolean = false;
+	public isBigScreen: boolean = false;
+	private debounce: Function = new Function();
+	private mermaidTimer: any = null;
     private hasSaved: boolean = true;
+    private readyPublish: boolean = false;
 
 	private created(): void {
-        this.getClientWidth();
-        this.debounce = debounce(this.preview, 500);
-		this.id = this.$route.params.postId;
+		this.getClientWidth();
+		this.debounce = debounce(this.preview, 500);
+        this.id = this.$route.params.postId;
 		if (this.id) {
-			this.getPost(this.id);
+            this.getPost(this.id);
+		} else {
+            this.content = this.initPostInfo({});
+            this.preview();
         }
-    }
-    
-    private getClientWidth(): void{
-        let _w = document.body.clientWidth;
-        if(_w > 960) this.isBigScreen = true;
-        this.isShowPre = this.isBigScreen;
-        this.isShowPreBtn = !this.isBigScreen;
-        window.onresize = () => {
-            _w = document.body.clientWidth;
-            this.isBigScreen = _w > 960 ? true : false;
-            this.isShowPre = this.isBigScreen;
-            this.isShowPreBtn = !this.isBigScreen;
-        }
-    }
+	}
+
+	private getClientWidth(): void {
+		let _w = document.body.clientWidth;
+		if (_w > 960) this.isBigScreen = true;
+		this.isShowPre = this.isBigScreen;
+		this.isShowPreBtn = !this.isBigScreen;
+		window.onresize = () => {
+			_w = document.body.clientWidth;
+			this.isBigScreen = _w > 960 ? true : false;
+			this.isShowPre = this.isBigScreen;
+			this.isShowPreBtn = !this.isBigScreen;
+		};
+	}
 
 	private getPost(id: string): void {
 		this.$API.getPost(id).then(res => {
 			if (res.code == 200) {
-				this.post = res.data;
-                this.content = this.post.content;
-                this.preview();
-			}
+                this.post = res.data;
+                this.readyPublish = this.post.status === 0 ? true : false;
+				this.content = this.initPostInfo(this.post) + this.post.content;
+				this.preview();
+			} else {
+                this.catchHttpError(res);
+            }
 		});
+	}
+
+	private initPostInfo(post: any): string{
+        let _postInfo: any = {title: "",author: "",desc: "",img_url: "",type: 0,origin: 0,tags: [],categrey: [],keywards: []};
+        for(let _key in _postInfo){
+            if(post.hasOwnProperty(_key)){
+                _postInfo[_key] = post[_key]
+            }
+        }
+        return `\`\`\` postInfo\n${JSON.stringify(_postInfo, null, 4)}\n\`\`\`\n`;
     }
-    
-    public beforePreview(): void{
-        this.isShowPre = true;
-        this.preview();
-    }
+
+	public beforePreview(): void {
+		this.isShowPre = true;
+		this.preview();
+	}
 
 	public preview(): void {
-        // 每次render前设置hasMermaid为false
-        marked.prototype.hasMermaid = false;
-        // 转化为markdown格式
-        this.previewContent = marked(this.content);
-        // 如果转换后的marked原型中hasMermaid为true， 则渲染甘特图
-        if(marked.prototype.hasMermaid){
-            clearTimeout(this.mermaidTimer)
-            this.mermaidTimer = setTimeout(() => {
-                try{
-                    mermaid.init(".mermaid");
-                }catch(e){
-                    message.error("mermaid 格式错误")
-                }
-            }, 0);
-        }
-    }
-
-    public onFocus(): void{
-        if(!this.isBigScreen) this.isShowPre = false;
-    }
-    
-    public onInput(): void{
-        this.debounce();
-        this.hasSaved = false;
-    }
-
-	public updateData(post: Post): void {
-		if (this.id) {
-			this.$API.updatePost(this.id, post).then(res => {
-				console.log(res, "update");
-			});
-		} else {
-			this.$API.createAPost(post).then(res => {
-				console.log(res, "create");
-			});
+		// 每次render前设置hasMermaid为false
+		marked.prototype.hasMermaid = false;
+		// 转化为markdown格式
+		this.previewContent = marked(this.content);
+		// 如果转换后的marked原型中hasMermaid为true， 则渲染甘特图
+		if (marked.prototype.hasMermaid) {
+			clearTimeout(this.mermaidTimer);
+			this.mermaidTimer = setTimeout(() => {
+				try {
+					mermaid.init(".mermaid");
+				} catch (e) {
+					message.error("mermaid 格式错误");
+				}
+			}, 0);
 		}
 	}
 
+	public onFocus(): void {
+		if (!this.isBigScreen) this.isShowPre = false;
+	}
+
+	public onInput(): void {
+		this.debounce();
+		this.hasSaved = false;
+	}
+
+	public updateData(post: Post): void {
+        let _status = post.status;
+		if (this.id) {
+			this.$API.updatePost(this.id, post).then(res => {
+                if (res.code == 200) {
+                    this.hasSaved = true;
+                    this.readyPublish = _status == 0 ? true : false;
+                    message.success(_status == 0 ? "保存成功！": "发布成功");
+                } else {
+                    this.catchHttpError(res);
+                }
+			});
+		} else {
+			this.$API.createAPost(post).then(res => {
+                if (res.code == 200) {
+                    this.hasSaved = true;
+                    this.readyPublish = _status == 0 ? true : false;
+                    message.success(_status == 0 ? "创建成功！": "发布成功");
+                } else {
+                    this.catchHttpError(res);
+                }
+			});
+		}
+    }
+
 	public onSave(): void {
-		if (!this.content) return;
-		this.post.content = this.content;
-		this.post.status = 0;
-		this.updateData(this.post);
+        let _data = this.dealPostdata(false);
+        if (_data)
+		    this.updateData(_data);
 	}
 
 	public onPublish(): void {
-		if (!this.content) return;
-		this.post.content = this.content;
-		this.post.status = 1;
-		this.updateData(this.post);
-	}
+        let _data = this.dealPostdata(true);
+        if (_data)
+		    this.updateData(_data);
+    }
+    
+    private dealPostdata(publish: boolean): any{
+        if (this.hasSaved && !this.readyPublish) {
+            message.warning("没有需要保存或者发布的信息！");
+            return null;
+        };
+        let _postInfo;
+        try{
+            _postInfo = JSON.parse(marked.prototype.postInfoString);
+        }catch(e){
+            message.error("postInfo信息应为正确的json格式");
+            return null;
+        }
+        _postInfo.content = this.content.replace(POSTINFOREG, "");
+        _postInfo.status = publish ? 1 : 0;
+        return _postInfo;
+    }
+
+    private catchHttpError(res: any): void{
+        message.error(res.msg);
+    }
 
 	public beforeRouteLeave(to: Route, from: Route, next: any) {
-        if(this.hasSaved){
-            next();
-        }else{
-            Modal.confirm({
-                title: "您有未保存的数据，确认离开？",
-                content: "点击取消按钮以保存数据， 确认离开请点击确认按钮",
-                okText: "确认",
-                cancelText: "取消",
-                onOk(){
-                    next();
-                },
-                onCancel(){
-                    next(false);
-                }
-            });
-        }
+		if (this.hasSaved) {
+			next();
+		} else {
+			Modal.confirm({
+				title: "您有未保存的数据，确认离开？",
+				content: "点击取消按钮以保存数据， 确认离开请点击确认按钮",
+				okText: "确认",
+				cancelText: "取消",
+				onOk() {
+					next();
+				},
+				onCancel() {
+					next(false);
+				}
+			});
+		}
 	}
 }
 </script>
@@ -247,49 +307,45 @@ export default class Edit extends Vue {
 		line-height: 60px;
 		button {
 			margin: 8px 16px;
-        }
-        .title{
-            width: 300px;
-            vertical-align: middle !important;
-        }
+		}
 	}
 	.edit-area {
-        height: calc(100% - 70px);
-        display: flex;
+		height: calc(100% - 70px);
+		display: flex;
 		textarea {
-            width: 50%;
+			width: 50%;
 			height: 100%;
 			color: $Color-2-hex;
 			background: $Color-1-hex;
-        }
-        .preview-area{
-            width: 50%;
-            height: 100%;
-            padding: 8px;
-            background: $Color-3-hex;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            text-align: left;
-            overflow: scroll;
-            transition: all .3s ease-in;
-        }
-        .preview-area:hover {
-            border-color: #40a9ff;
-            border-right-width: 1px !important;
-        }
+		}
+		.preview-area {
+			width: 50%;
+			height: 100%;
+			padding: 8px;
+			background: $Color-3-hex;
+			border: 1px solid #d9d9d9;
+			border-radius: 4px;
+			text-align: left;
+			overflow: scroll;
+			transition: all 0.3s ease-in;
+		}
+		.preview-area:hover {
+			border-color: #40a9ff;
+			border-right-width: 1px !important;
+		}
 	}
 }
 
-@media screen and (max-width: 960px){
-    textarea {
-        width: 100% !important;
-    }
-    .preview-area{
-        width: 90% !important;
-        height: calc(100% - #{$navH} - 86px) !important;
-        position: fixed;
-        right: 0;
-    }
+@media screen and (max-width: 960px) {
+	textarea {
+		width: 100% !important;
+	}
+	.preview-area {
+		width: 90% !important;
+		height: calc(100% - #{$navH} - 86px) !important;
+		position: fixed;
+		right: 0;
+	}
 }
 </style>
 

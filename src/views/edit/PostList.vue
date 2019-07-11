@@ -8,7 +8,7 @@
 				:dataSource="postList"
 				:columns="columns"
 				:rowKey="'_id'"
-				:pagination="{ pageSize: 7 }"
+				:pagination="{ 'pageSize': 7, 'defaultCurrent': currentPage, 'onChange': onPageChange}"
 			>
 				<template slot="__id" slot-scope="text, record, index">
 					<p>{{index + 1}}</p>
@@ -100,7 +100,8 @@ export default class Posts extends Vue {
 			width: "30%",
 			scopedSlots: { customRender: "operation" }
 		}
-	];
+    ];
+    public currentPage: number = 2;
 	private beforeCreate() {
 		this.$API.getAllPosts().then((data: any) => {
 			this.postList = data.data || [];
@@ -148,7 +149,11 @@ export default class Posts extends Vue {
 
 	public onCreate(): void {
 		this.$router.push({ name: "edit" });
-	}
+    }
+    
+    public onPageChange(e: number): void{
+        this.currentPage = e;
+    }
 }
 </script>
 
