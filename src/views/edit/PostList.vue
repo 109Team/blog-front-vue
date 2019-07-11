@@ -106,7 +106,11 @@ export default class Posts extends Vue {
 	private pageSize: number = 7;
 	private created() {
 		let _params = { pageNum: this.pageNum, pageSize: this.pageSize };
-		this.$API.getAllPosts(_params).then((res: any) => {
+		this.getData(_params);
+    }
+    
+    private getData(params: object){
+        this.$API.getAllPosts(params).then((res: any) => {
 			if (res.code == 200) {
 		        let _data = res.data || [];
                 this.dealData(_data);
@@ -114,7 +118,7 @@ export default class Posts extends Vue {
 				this.catchHttpError(res);
 			}
 		});
-	}
+    }
 
 	private dealData(data: Post[]) {
         this.postList = [...this.postList,...data];
@@ -175,15 +179,8 @@ export default class Posts extends Vue {
 
 	public onPageChange(e: number): void {
         this.currentPage = e;
-        let _params = { pageNum: this.pageNum++, pageSize: this.pageSize };
-		this.$API.getAllPosts(_params).then((res: any) => {
-			if (res.code == 200) {
-		        let _data = res.data || [];
-                this.dealData(_data);
-			} else {
-				this.catchHttpError(res);
-			}
-		});
+        let _params = { pageNum: this.currentPage, pageSize: this.pageSize };
+		this.getData(_params);
 	}
 }
 </script>
