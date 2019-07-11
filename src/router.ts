@@ -40,7 +40,7 @@ export default new Router({
           component: () => import(/* webpackChunkName: "postlist" */ './views/edit/PostList.vue'),
         },
         {
-          path: 'edit',
+          path: 'edit/:postId?',
           name: 'edit',
           component: () => import(/* webpackChunkName: "edit" */ './views/edit/Edit.vue'),
         }

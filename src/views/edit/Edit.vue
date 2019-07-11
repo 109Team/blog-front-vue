@@ -234,6 +234,8 @@ export default class Edit extends Vue {
                     this.hasSaved = true;
                     this.readyPublish = _status == 0 ? true : false;
                     message.success(_status == 0 ? "创建成功！": "发布成功");
+                    this.id = res.data._id;
+                    this.$router.push({ name: "edit", params: { postId: this.id} });
                 } else {
                     this.catchHttpError(res);
                 }
@@ -242,22 +244,26 @@ export default class Edit extends Vue {
     }
 
 	public onSave(): void {
+        if (this.hasSaved) {
+            message.warning("没有需要保存的信息！");
+            return ;
+        };
         let _data = this.dealPostdata(false);
         if (_data)
 		    this.updateData(_data);
 	}
 
 	public onPublish(): void {
+        if (this.hasSaved && !this.readyPublish) {
+            message.warning("没有需要发布的信息！");
+            return ;
+        };
         let _data = this.dealPostdata(true);
         if (_data)
 		    this.updateData(_data);
     }
     
     private dealPostdata(publish: boolean): any{
-        if (this.hasSaved && !this.readyPublish) {
-            message.warning("没有需要保存或者发布的信息！");
-            return null;
-        };
         let _postInfo;
         try{
             _postInfo = JSON.parse(marked.prototype.postInfoString);

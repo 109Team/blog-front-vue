@@ -10,8 +10,8 @@
 				:rowKey="'_id'"
 				:pagination="{ 'pageSize': 7, 'defaultCurrent': currentPage, 'onChange': onPageChange}"
 			>
-				<template slot="__id" slot-scope="text, record, index">
-					<p>{{index + 1}}</p>
+				<template slot="__id" slot-scope="text, record">
+					<p>{{record.index + 1}}</p>
 				</template>
 				<template slot="status" slot-scope="text">
 					<p :style="{'color': statusArray[text]['color']}">{{statusArray[text]['label']}}</p>
@@ -19,14 +19,14 @@
 				<template slot="update_time" slot-scope="text">
 					<p>{{text | dateString}}</p>
 				</template>
-				<template slot="operation" slot-scope="text, record, index">
+				<template slot="operation" slot-scope="text, record">
 					<a href="javascript:;" class="edit-btn" @click="onEdit(record._id)">编辑</a>
 					<a-popconfirm
 						v-if="postList.length && ~[1,2].indexOf(record.status)"
 						cancelText="取消"
 						okText="确认"
 						:title="`确认${record.status === 2 ? '永久': ''}删除?`"
-						@confirm="() => onDelete(record, index)"
+						@confirm="() => onDelete(record, record.index)"
 					>
 						<a v-if="record.status === 1" style="color: #ceb4be;" href="javascript:;">删除</a>
 						<a v-else style="color: #ff0000;" href="javascript:;">永久删除</a>
@@ -36,7 +36,7 @@
 						cancelText="取消"
 						okText="确认"
 						title="确认发布?"
-						@confirm="() => onPublish(record, index)"
+						@confirm="() => onPublish(record, record.index)"
 					>
 						<a style="color:#2bc39d;" href="javascript:;">发布</a>
 					</a-popconfirm>
@@ -48,7 +48,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { Table, Button, Popconfirm } from "ant-design-vue";
+import { Table, Button, Popconfirm, message } from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
 import { Post } from "@/model/post";
@@ -100,14 +100,34 @@ export default class Posts extends Vue {
 			width: "30%",
 			scopedSlots: { customRender: "operation" }
 		}
-    ];
-    public currentPage: number = 1;
-	private beforeCreate() {
-		this.$API.getAllPosts().then((data: any) => {
-			this.postList = data.data || [];
+	];
+	public currentPage: number = 1;
+	private pageNum: number = 1;
+	private pageSize: number = 7;
+	private created() {
+		let _params = { pageNum: this.pageNum, pageSize: this.pageSize };
+		this.$API.getAllPosts(_params).then((res: any) => {
+			if (res.code == 200) {
+		        let _data = res.data || [];
+                this.dealData(_data);
+			} else {
+				this.catchHttpError(res);
+			}
 		});
-    }
-   
+	}
+
+	private dealData(data: Post[]) {
+        this.postList = [...this.postList,...data];
+		this.postList = data.map((item: any, index: any) => {
+			item.index = index;
+			return item;
+		});
+	}
+
+	private catchHttpError(res: any): void {
+		message.error(res.msg);
+	}
+
 	public onDelete(record: Post, index: number): void {
 		if (record.status === 1) {
 			this.$API.updatePost(record._id, { status: 2 }).then(res => {
@@ -122,16 +142,18 @@ export default class Posts extends Vue {
 		} else {
 			this.$API.deletePost(record._id).then(res => {
 				if (res.code == 200) {
-					this.postList = this.postList.filter(
-						item => item._id !== record._id
-					);
+					this.postList = this.postList
+						.filter(item => item._id !== record._id)
+						.map((item: any, index: any) => {
+							item.index = index;
+							return item;
+						});
 				}
 			});
 		}
 	}
 
 	public onPublish(record: Post, index: number): void {
-		console.log(record);
 		this.$API.updatePost(record._id, { status: 1 }).then(res => {
 			if (res.code == 200) {
 				Vue.set(
@@ -149,11 +171,20 @@ export default class Posts extends Vue {
 
 	public onCreate(): void {
 		this.$router.push({ name: "edit" });
-    }
-    
-    public onPageChange(e: number): void{
+	}
+
+	public onPageChange(e: number): void {
         this.currentPage = e;
-    }
+        let _params = { pageNum: this.pageNum++, pageSize: this.pageSize };
+		this.$API.getAllPosts(_params).then((res: any) => {
+			if (res.code == 200) {
+		        let _data = res.data || [];
+                this.dealData(_data);
+			} else {
+				this.catchHttpError(res);
+			}
+		});
+	}
 }
 </script>
 
@@ -172,7 +203,7 @@ export default class Posts extends Vue {
 	.list-content {
 		width: calc(100% - 32px);
 		height: calc(100% - 86px);
-        margin: 0 16px 16px;
+		margin: 0 16px 16px;
 		.edit-btn {
 			margin-right: 30px;
 		}

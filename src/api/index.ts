@@ -1,8 +1,8 @@
 import HTTP from './http';
 
 const API = {
-    getAllPosts(): Promise<any>{
-        return HTTP.get('/posts');
+    getAllPosts(params?: object): Promise<any>{
+        return HTTP.get('/posts', params);
     },
 
     createAPost(post: object): Promise<any>{

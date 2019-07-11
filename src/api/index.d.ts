@@ -1,5 +1,5 @@
 interface API{
-    getAllPosts: () => Promise<any>;
+    getAllPosts: (params?: object) => Promise<any>;
     createAPost: (post: object) => Promise<any>;
     getPost: (id: string) => Promise<any>;
     updatePost: (id: string, post: object) => Promise<any>;
