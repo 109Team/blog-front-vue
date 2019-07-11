@@ -101,7 +101,7 @@ export default class Posts extends Vue {
 			scopedSlots: { customRender: "operation" }
 		}
     ];
-    public currentPage: number = 2;
+    public currentPage: number = 1;
 	private beforeCreate() {
 		this.$API.getAllPosts().then((data: any) => {
 			this.postList = data.data || [];
