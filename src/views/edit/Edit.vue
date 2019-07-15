@@ -1,6 +1,17 @@
 <template>
 	<div class="edit-warpper">
 		<div class="edit-header">
+            <div class="upload-area">
+                <a-upload-dragger
+					name="file"
+                    accept=".md"
+					:multiple="true"
+					@change="handleChange"
+                    :customRequest="()=>{}"
+				>
+					<p class="ant-upload-text">点击或拖动文件到此以上传</p>
+				</a-upload-dragger>
+            </div>
 			<a-button type="primary" @click="onSave">保存</a-button>
 			<a-button type="danger" @click="onPublish">发布</a-button>
 			<a-button type="danger" v-show="isShowPreBtn" @click="beforePreview">预览</a-button>
@@ -23,7 +34,15 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { Route } from "vue-router";
-import { Button, Popconfirm, Input, message, Modal } from "ant-design-vue";
+import {
+	Button,
+	Popconfirm,
+	Input,
+	message,
+	Modal,
+	Upload,
+	Icon
+} from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
 import { Post } from "../../model/post";
@@ -118,7 +137,7 @@ initMarked();
 function registerComponent(components: Array<any>): void {
 	components.forEach(item => Vue.use(item));
 }
-registerComponent([Button, Popconfirm, Input]);
+registerComponent([Button, Popconfirm, Input, Upload, Icon]);
 
 const POSTINFOREG = /```\s*?postInfo\n+(.|\n)*?\s+```\n/;
 
@@ -133,19 +152,19 @@ export default class Edit extends Vue {
 	public isBigScreen: boolean = false;
 	private debounce: Function = new Function();
 	private mermaidTimer: any = null;
-    private hasSaved: boolean = true;
-    private readyPublish: boolean = false;
+	private hasSaved: boolean = true;
+	private readyPublish: boolean = false;
 
 	private created(): void {
 		this.getClientWidth();
 		this.debounce = debounce(this.preview, 500);
-        this.id = this.$route.params.postId;
+		this.id = this.$route.params.postId;
 		if (this.id) {
-            this.getPost(this.id);
+			this.getPost(this.id);
 		} else {
-            this.content = this.initPostInfo({});
-            this.preview();
-        }
+			this.content = this.initPostInfo({});
+			this.preview();
+		}
 	}
 
 	private getClientWidth(): void {
@@ -164,25 +183,39 @@ export default class Edit extends Vue {
 	private getPost(id: string): void {
 		this.$API.getPost(id).then(res => {
 			if (res.code == 200) {
-                this.post = res.data;
-                this.readyPublish = this.post.status === 0 ? true : false;
+				this.post = res.data;
+				this.readyPublish = this.post.status === 0 ? true : false;
 				this.content = this.initPostInfo(this.post) + this.post.content;
 				this.preview();
 			} else {
-                this.catchHttpError(res);
-            }
+				this.catchHttpError(res);
+			}
 		});
 	}
 
-	private initPostInfo(post: any): string{
-        let _postInfo: any = {title: "",author: "",desc: "",img_url: "",type: 0,origin: 0,tags: [],categrey: [],keywards: []};
-        for(let _key in _postInfo){
-            if(post.hasOwnProperty(_key)){
-                _postInfo[_key] = post[_key]
-            }
-        }
-        return `\`\`\` postInfo\n${JSON.stringify(_postInfo, null, 4)}\n\`\`\`\n`;
-    }
+	private initPostInfo(post: any): string {
+		let _postInfo: any = {
+			title: "",
+			author: "",
+			desc: "",
+			img_url: "",
+			type: 0,
+			origin: 0,
+			tags: [],
+			categrey: [],
+			keywards: []
+		};
+		for (let _key in _postInfo) {
+			if (post.hasOwnProperty(_key)) {
+				_postInfo[_key] = post[_key];
+			}
+		}
+		return `\`\`\` postInfo\n${JSON.stringify(
+			_postInfo,
+			null,
+			4
+		)}\n\`\`\`\n`;
+	}
 
 	public beforePreview(): void {
 		this.isShowPre = true;
@@ -217,68 +250,69 @@ export default class Edit extends Vue {
 	}
 
 	public updateData(post: Post): void {
-        let _status = post.status;
+		let _status = post.status;
 		if (this.id) {
 			this.$API.updatePost(this.id, post).then(res => {
-                if (res.code == 200) {
-                    this.hasSaved = true;
-                    this.readyPublish = _status == 0 ? true : false;
-                    message.success(_status == 0 ? "保存成功！": "发布成功");
-                } else {
-                    this.catchHttpError(res);
-                }
+				if (res.code == 200) {
+					this.hasSaved = true;
+					this.readyPublish = _status == 0 ? true : false;
+					message.success(_status == 0 ? "保存成功！" : "发布成功");
+				} else {
+					this.catchHttpError(res);
+				}
 			});
 		} else {
 			this.$API.createAPost(post).then(res => {
-                if (res.code == 200) {
-                    this.hasSaved = true;
-                    this.readyPublish = _status == 0 ? true : false;
-                    message.success(_status == 0 ? "创建成功！": "发布成功");
-                    this.id = res.data._id;
-                    this.$router.push({ name: "edit", params: { postId: this.id} });
-                } else {
-                    this.catchHttpError(res);
-                }
+				if (res.code == 200) {
+					this.hasSaved = true;
+					this.readyPublish = _status == 0 ? true : false;
+					message.success(_status == 0 ? "创建成功！" : "发布成功");
+					this.id = res.data._id;
+					this.$router.push({
+						name: "edit",
+						params: { postId: this.id }
+					});
+				} else {
+					this.catchHttpError(res);
+				}
 			});
 		}
-    }
+	}
 
 	public onSave(): void {
-        if (this.hasSaved) {
-            message.warning("没有需要保存的信息！");
-            return ;
-        };
-        let _data = this.dealPostdata(false);
-        if (_data)
-		    this.updateData(_data);
+		if (this.hasSaved) {
+			message.warning("没有需要保存的信息！");
+			return;
+		}
+		let _data = this.dealPostdata(false);
+		if (_data) this.updateData(_data);
 	}
 
 	public onPublish(): void {
-        if (this.hasSaved && !this.readyPublish) {
-            message.warning("没有需要发布的信息！");
-            return ;
-        };
-        let _data = this.dealPostdata(true);
-        if (_data)
-		    this.updateData(_data);
-    }
-    
-    private dealPostdata(publish: boolean): any{
-        let _postInfo;
-        try{
-            _postInfo = JSON.parse(marked.prototype.postInfoString);
-        }catch(e){
-            message.error("postInfo信息应为正确的json格式");
-            return null;
-        }
-        _postInfo.content = this.content.replace(POSTINFOREG, "");
-        _postInfo.status = publish ? 1 : 0;
-        return _postInfo;
-    }
+		if (this.hasSaved && !this.readyPublish) {
+			message.warning("没有需要发布的信息！");
+			return;
+		}
+		let _data = this.dealPostdata(true);
+		if (_data) this.updateData(_data);
+	}
 
-    private catchHttpError(res: any): void{
-        message.error(res.msg);
-    }
+	private dealPostdata(publish: boolean): any {
+		let _postInfo;
+		try {
+			_postInfo = JSON.parse(marked.prototype.postInfoString);
+		} catch (e) {
+			message.error("postInfo信息应为正确的json格式");
+			return null;
+		}
+		_postInfo.content = this.content.replace(POSTINFOREG, "");
+		_postInfo.status = publish ? 1 : 0;
+		return _postInfo;
+	}
+
+	private catchHttpError(res: any): void {
+		message.error(res.msg);
+	}
 
 	public beforeRouteLeave(to: Route, from: Route, next: any) {
 		if (this.hasSaved) {
@@ -298,10 +332,23 @@ export default class Edit extends Vue {
 			});
 		}
 	}
+
+	public handleChange(info: any) {
+        console.log(info);
+        let fr = new FileReader();
+        fr.onload = (e: any) => {
+            console.log(e.target.result);
+            this.content = this.initPostInfo({}) + '\n' + e.target.result;
+            console.log(this.content);
+            this.preview();
+        }
+
+        fr.readAsText(info.file.originFileObj);
+	}
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import "@/assets/scss/theme.scss";
 .edit-warpper {
 	box-sizing: border-box;
@@ -309,14 +356,30 @@ export default class Edit extends Vue {
 	height: 100%;
 	.edit-header {
 		text-align: right;
-		height: 60px;
-		line-height: 60px;
+        height: 70px;
+        line-height: 70px;
+        margin-bottom: 8px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
 		button {
 			margin: 8px 16px;
-		}
+        }
+        .upload-area{
+            height: 100%;
+            width: 100%;
+            display: inline-block;
+            position: relative;
+            .ant-upload-list-text{
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+        }
 	}
 	.edit-area {
-		height: calc(100% - 70px);
+		height: calc(100% - 80px);
 		display: flex;
 		textarea {
 			width: 50%;
@@ -338,7 +401,7 @@ export default class Edit extends Vue {
 		.preview-area:hover {
 			border-color: #40a9ff;
 			border-right-width: 1px !important;
-		}
+        }
 	}
 }
 

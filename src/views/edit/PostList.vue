@@ -8,7 +8,7 @@
 				:dataSource="postList"
 				:columns="columns"
 				:rowKey="'_id'"
-				:pagination="{ 'pageSize': 7, 'defaultCurrent': currentPage, 'onChange': onPageChange}"
+				:pagination="{ 'pageSize': 7}"
 			>
 				<template slot="__id" slot-scope="text, record">
 					<p>{{record.index + 1}}</p>
@@ -101,18 +101,18 @@ export default class Posts extends Vue {
 			scopedSlots: { customRender: "operation" }
 		}
 	];
-	public currentPage: number = 1;
-	private pageNum: number = 1;
-	private pageSize: number = 7;
+    public currentPage: number = 1;
+    public total: number = 0;
 	private created() {
-		let _params = { pageNum: this.pageNum, pageSize: this.pageSize };
+		let _params = { pageNum: this.currentPage };
 		this.getData(_params);
     }
     
     private getData(params: object){
         this.$API.getAllPosts(params).then((res: any) => {
 			if (res.code == 200) {
-		        let _data = res.data || [];
+                let _data = res.data.data || [];
+                this.total = res.data.allCount;
                 this.dealData(_data);
 			} else {
 				this.catchHttpError(res);
@@ -122,7 +122,9 @@ export default class Posts extends Vue {
 
 	private dealData(data: Post[]) {
         this.postList = [...this.postList,...data];
-		this.postList = data.map((item: any, index: any) => {
+        console.log(this.postList, data);
+        
+		this.postList = this.postList.map((item: any, index: any) => {
 			item.index = index;
 			return item;
 		});
@@ -179,7 +181,9 @@ export default class Posts extends Vue {
 
 	public onPageChange(e: number): void {
         this.currentPage = e;
-        let _params = { pageNum: this.currentPage, pageSize: this.pageSize };
+        console.log(e);
+        
+        let _params = { pageNum: this.currentPage };
 		this.getData(_params);
 	}
 }

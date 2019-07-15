@@ -30,7 +30,7 @@ export default class Posts extends Vue {
 
 	private beforeCreate() {
 		this.$API.getAllPosts().then((data: any) => {
-			this.postList = data.data || [];
+			this.postList = data.data.data || [];
 		});
 	}
 
