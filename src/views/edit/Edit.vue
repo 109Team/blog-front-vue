@@ -157,7 +157,7 @@ export default class Edit extends Vue {
 
 	private created(): void {
 		this.getClientWidth();
-		this.debounce = debounce(this.preview, 500);
+		this.debounce = debounce(this.preview, 2000);
 		this.id = this.$route.params.postId;
 		if (this.id) {
 			this.getPost(this.id);
@@ -302,6 +302,8 @@ export default class Edit extends Vue {
 		try {
 			_postInfo = JSON.parse(marked.prototype.postInfoString);
 		} catch (e) {
+            console.log(e);
+            
 			message.error("postInfo信息应为正确的json格式");
 			return null;
 		}
@@ -396,7 +398,31 @@ export default class Edit extends Vue {
 			border-radius: 4px;
 			text-align: left;
 			overflow: scroll;
-			transition: all 0.3s ease-in;
+            transition: all 0.3s ease-in;
+            blockquote{
+				position: relative;
+				margin: 0;
+				padding: 16px;
+				background: rgba(0,0,0,.05)
+			}
+			blockquote:before{
+				content: "";
+				width: 2px;
+				height: 100%;
+				position: absolute;
+				left: 0;
+				top: 0;
+				background: rgba(0,0,0,.25);
+			}
+			ol {
+				padding: 0 16px;
+            }
+            .mermaid{
+                text-align: center;
+            }
+            .hljs{
+				line-height: 1.8em;
+			}
 		}
 		.preview-area:hover {
 			border-color: #40a9ff;

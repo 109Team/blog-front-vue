@@ -73,7 +73,7 @@ export default class Posts extends Vue {
 						.item-img {
 							width: 50%;
 							min-width: 50%;
-							object-fit: none;
+							object-fit: cover;
 							object-position: center;
 						}
 						.item-content {

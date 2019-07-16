@@ -38,7 +38,16 @@
 						title="确认发布?"
 						@confirm="() => onPublish(record, record.index)"
 					>
-						<a style="color:#2bc39d;" href="javascript:;">发布</a>
+						<a class="edit-btn" style="color:#2bc39d;" href="javascript:;">发布</a>
+					</a-popconfirm>
+                    <a-popconfirm
+						v-if="postList.length && record.status === 0"
+						cancelText="取消"
+						okText="确认"
+						:title="`确认删除?`"
+						@confirm="() => onDelete(record, record.index)"
+					>
+						<a style="color: #ceb4be;" href="javascript:;">删除</a>
 					</a-popconfirm>
 				</template>
 			</a-table>
@@ -135,7 +144,7 @@ export default class Posts extends Vue {
 	}
 
 	public onDelete(record: Post, index: number): void {
-		if (record.status === 1) {
+		if (record.status === 1 || record.status === 0) {
 			this.$API.updatePost(record._id, { status: 2 }).then(res => {
 				if (res.code == 200) {
 					Vue.set(

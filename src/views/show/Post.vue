@@ -1,14 +1,16 @@
 <template>
 	<section class="post-warpper">
-		<article class="post-area" v-if="post.title">
-			<h1 class="post-title">{{post.title}}</h1>
-			<div class="post-info">
-				<span>{{post.meta_data.views}}</span>
-				<span>{{post.meta_data.likes}}</span>
-				<span>{{post.words_count}}</span>
-			</div>
-			<div class="post-content" v-html="content"></div>
-		</article>
+		<transition name="fade">
+			<article class="post-area" v-if="post.title">
+				<h1 class="post-title">{{post.title}}</h1>
+				<div class="post-info">
+					<span>{{post.meta_data.views}}</span>
+					<span>{{post.meta_data.likes}}</span>
+					<span>{{post.words_count}}</span>
+				</div>
+				<div class="post-content" v-html="content"></div>
+			</article>
+		</transition>
 	</section>
 </template>
 
@@ -129,6 +131,31 @@ export default class Post extends Vue {
 		width: 100%;
 		.post-content {
 			margin-top: 16px;
+			text-align: left;
+			blockquote{
+				position: relative;
+				margin: 0;
+				padding: 16px;
+				background: rgba(0,0,0,.05)
+			}
+			blockquote:before{
+				content: "";
+				width: 2px;
+				height: 100%;
+				position: absolute;
+				left: 0;
+				top: 0;
+				background: rgba(0,0,0,.25);
+			}
+			ol {
+				padding: 0 16px;
+			}
+			.mermaid{
+                text-align: center;
+			}
+			.hljs{
+				line-height: 1.8em;
+			}
 		}
 	}
 }
