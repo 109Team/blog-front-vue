@@ -21,28 +21,28 @@ export default new Router({
         {
           path: 'post/:postId',
           name: 'post',
-          component: () => import(/* webpackChunkName: "post" */ './views/show/Post.vue'),
+          component: () => import(/* webpackChunkName: "post" */ '@/views/show/Post.vue'),
         },
         {
           path: 'categrey',
           name: 'categrey',
-          component: () => import(/* webpackChunkName: "categrey" */ './views/show/Categrey.vue'),
+          component: () => import(/* webpackChunkName: "categrey" */ '@/views/show/Categrey.vue'),
         }
       ]
     },
     {
       path: '/admin',
-      component: () => import(/* webpackChunkName: "admin" */ './views/edit/Admin.vue'),
+      component: () => import(/* webpackChunkName: "admin" */ '@/views/edit/Admin.vue'),
       children: [
         {
           path: '',
           name: 'postlist',
-          component: () => import(/* webpackChunkName: "postlist" */ './views/edit/PostList.vue'),
+          component: () => import(/* webpackChunkName: "postlist" */ '@/views/edit/PostList.vue'),
         },
         {
           path: 'edit/:postId?',
           name: 'edit',
-          component: () => import(/* webpackChunkName: "edit" */ './views/edit/Edit.vue'),
+          component: () => import(/* webpackChunkName: "edit" */ '@/views/edit/Edit.vue'),
         }
       ]
     },

@@ -13,5 +13,8 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <% for(let i in htmlWebpackPlugin.options.configs){ %>
+      <script src="<%= htmlWebpackPlugin.options.configs[i] %>" ></script>
+    <% } %>
   </body>
 </html>

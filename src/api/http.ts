@@ -1,9 +1,8 @@
 import axios from 'axios';
 
 import * as AUTH_TOKEN from '../common/authToken';
-const CONFIG = require('../config/config.json');
 
-axios.defaults.baseURL = CONFIG.baseURL;
+axios.defaults.baseURL = (window as any).baseURL;
 axios.defaults.timeout = 5000;
 axios.defaults.headers.common['Authoriation'] = AUTH_TOKEN.getAuthToken();
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
