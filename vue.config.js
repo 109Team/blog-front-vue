@@ -1,3 +1,4 @@
+const path = require('path');
 
 const configfiles = {
     development: {
@@ -8,6 +9,9 @@ const configfiles = {
     }
 }
 module.exports = {
+
+    // 出口配置
+    outputDir: path.join(__dirname, 'server/client'),
 
     // pwa 配置
     pwa: {
