@@ -1,11 +1,12 @@
 {
   "name": "blog-front-vue",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "pack": "sudo sh ./pack.sh"
   },
   "dependencies": {
     "@types/highlight.js": "^9.12.3",
