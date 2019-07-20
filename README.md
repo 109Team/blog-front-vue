@@ -50,3 +50,7 @@ npm run publish
 ### 备注
 > 打包生成的zip包名中的projectname version使用的是server/package.json中的字段
 > 根目录下的package.json中的version主要用于前端版本管理和部署版本无关联
+
+
+### 待办
+> api后置于内网，不向外暴露接口， 需修改server.js
