@@ -10,7 +10,7 @@ function getJsonkey() {
 
 # 设置pack变量
 echo "################## 设置pack变量... ##################"
-json=$(cat ./package.json)
+json=$(cat ./server/package.json)
 getJsonkey "$json" "version"
 version=$value
 getJsonkey "$json" "name"
@@ -24,7 +24,7 @@ echo "版本号:   $version"
 
 # 编译构建
 echo "#################### 编译构建... ####################"
-# npm run build
+npm run build
 
 # 打包zip
 echo "#################### 打包zip... ####################"

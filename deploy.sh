@@ -55,7 +55,7 @@ fi
 
 # 获取项目名称和版本信息，用于匹配要发布的包
 dirname=$(pwd)
-json=$(cat ./package.json)
+json=$(cat ./server/package.json)
 getJsonkey "$json" "version"
 version=$jsonValue
 getJsonkey "$json" "name"
@@ -65,7 +65,7 @@ projectname=$jsonValue
 echo "################## 查找要上传的包... ##################"
 deployPackage=$(find $dirname/$projectname-$version-*.zip)
 
-zipName=$(${deployPackage:10:-1})
+zipName=`awk -F ''$dirname/'' '{print $2}' <<< "$deployPackage"`
 echo $zipName
 
 # 拷贝目录文件到服务器
@@ -73,12 +73,18 @@ echo "################## 上传文件... ##################"
 deployPackagePath=$remoteAddress:$deployPath/package
 
 # 如果遇到Permission denied 请设置服务端文件夹$deployPackagePath的目录权限为可写
-# scp "$deployPackage" "$deployPackagePath"
+scp "$deployPackage" "$deployPackagePath"
 
 
 # 远程登陆并部署
 echo "################## 远程登陆并部署... ##################"
 ssh "$remoteAddress" << remotessh
 cd $deployPath/package
-unzip $deployPackage -d ../$projectname
+unzip -o $zipName -d ../$projectname
+cd ../$projectname/server
+
+# 暂停8秒，等待pm2重启， 已获得最新的PID
+echo "################## 等待重启中... ##################"
+sleep 8
+sh ./deploy-remotessh.sh
 remotessh
